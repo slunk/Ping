@@ -8,7 +8,9 @@
         <script src="http://js.leapmotion.com/0.2.0/leap.min.js"></script>
         <script src="js/input_handlers.js"></script>
         <script src="js/pong.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
         <script>
+            var socket = io.connect('http://localhost:9001');
             var scene = new THREE.Scene();
             var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
 
@@ -27,6 +29,12 @@
                 requestAnimationFrame(render);
 
                 game.update();
+
+                socket.emit('coords', {
+                    paddleA: game.paddleA.ledCubeCoords(),
+                    paddleB: game.paddleB.ledCubeCoords(),
+                    puck: game.puck.ledCubeCoords()
+                });
 
                 renderer.render(scene, camera);
             };

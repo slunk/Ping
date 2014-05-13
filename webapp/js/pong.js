@@ -45,6 +45,12 @@ Paddle.prototype.contains = function(vec) {
         && vec.y > pos.y - 0.7 && vec.y < pos.y + 0.7;
 };
 
+Paddle.prototype.ledCubeCoords = function() {
+    return {x: Math.round(this.position().x + 3),
+            y: Math.round(this.position().y + 1.5),
+            z: Math.round(-this.position().z)}
+};
+
 function Puck(pos, vel) {
     this.geometry = new THREE.SphereGeometry(0.5);
     this.material = new THREE.MeshBasicMaterial({color: 0x0000ff, wireframe: true});
@@ -69,6 +75,12 @@ Puck.prototype.update = function() {
 
 Puck.prototype.mesh = function() {
     return this.sphere;
+};
+
+Puck.prototype.ledCubeCoords = function() {
+    return {x: Math.round(this.position().x + 4),
+            y: Math.round(this.position().y + 2.5),
+            z: Math.round(-this.position().z)}
 };
 
 function Pong(width, height, depth) {
