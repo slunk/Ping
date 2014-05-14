@@ -58,14 +58,14 @@ const int p39 = 13;
 
 const int ground[] = {g0, g1, g2, g3, g4, g5, g6, g7, g8, g9};
 
-int positive2[][5] = {{p7, p14, p21, p28, p35},
-                   {p6, p13, p20, p27, p34},
-                   {p5, p12, p19, p26, p33},
-                   {p4, p11, p18, p25, p32},
-                   {p3, p10, p17, p24, p31},
-                   {p2, p9, p16, p23, p30},
-                   {p1, p8, p15, p22, p29},
-                   {p0, p7, p14, p21, p28}};
+int positive2[][5] = {{p7, p15, p23, p31, p39},
+                      {p6, p14, p22, p30, p38},
+                      {p5, p13, p21, p29, p37},
+                      {p4, p12, p20, p28, p36},
+                      {p3, p11, p19, p27, p35},
+                      {p2, p10, p18, p26, p34},
+                      {p1, p9, p17, p25, p33},
+                      {p0, p8, p16, p24, p32}};
 
 const int ground_length = sizeof(ground) / sizeof(ground[0]);
 int matrix[8][5][10];
@@ -74,18 +74,19 @@ int matrix[8][5][10];
 int paddle1_x = 2;
 int paddle1_y = 1;
 int paddle1_z = 0;
-int paddle2_x = 2;
-int paddle2_y = 1;
+int paddle2_x = 5;
+int paddle2_y = 0;
 int paddle2_z = 9;
 int puck_x = 3;
 int puck_y = 2;
 int puck_z = 4;
 
+
 String input;
 
 void setup() {
   // initialize serial communication to 9600 bits per second:
-  Serial.begin(9600);
+  Serial.begin(1843200);
   
   input = "";
 
@@ -101,8 +102,7 @@ void setup() {
       pinMode(positive2[i][j], OUTPUT);
     }
   }
-
-
+  
   // turn everything off initially
   for (int i = 0; i < ground_length; i++) {
     digitalWrite(ground[i], HIGH);  // will act as ground when LOW;
@@ -112,14 +112,10 @@ void setup() {
       digitalWrite(positive2[i][j], LOW);
     }
   }
-
-  //digitalWrite(ground[0], LOW);  // enable ground for the layer with paddle 1
-  //digitalWrite(ground[ground_length-1], LOW);  // enable ground for the layer with paddle 2
 }
 
 
 void loop() {
-  delay(1000);
   /*
   if (Serial.available()) {
     //input = Serial.readString();
@@ -181,42 +177,23 @@ void loop() {
     puck_y = (puck.substring(first_pos + 1, last_pos)).toInt();
     puck_z = (puck.substring(last_pos + 1)).toInt();
   }
+  else {
+    Serial.println("else");
+  }
+  
   // enable paddle 1 and paddle 2 LEDs
   for (int i = 0; i < 3; i++) {
-    matrix[paddle1_x + i][paddle1_y][paddle1_z] = 1;
-    matrix[paddle2_x + i][paddle2_y][paddle2_z] = 1;
+    for (int j=0; j<2; j++) {
+      matrix[paddle1_x + i][paddle1_y+i][paddle1_z] = 1;
+      matrix[paddle2_x + i][paddle2_y+j][paddle2_z] = 1;
+    }
   }
   // enable the puck LED
-  matrix[puck_x][puck_y][puck_z] = 1;
+  //matrix[puck_x][puck_y][puck_z] = 1;
 
 
   // flick all the lights on/off
   display_matrix(matrix);
-
-
-  // disable paddle 1 and paddle 2 LEDs
-  for (int i = 0; i < 3; i++) {
-    matrix[paddle1_x + i][paddle1_y][paddle1_z] = 0;
-    matrix[paddle2_x + i][paddle2_y][paddle2_z] = 0;
-  }
-  // disable the puck LED
-  matrix[puck_x][puck_y][puck_z] = 0;
-  
-}
-
-
-/*
- * simulate() is just a temporary function used to simulate data.
- * Should be removed after testing is done.
- *
- */
-int counter = 0;
-int counter2 = 0;
-String simulate() {
-  String result = String(counter % 6) + ",1,0:" + String(counter % 6) + ",3,1:2,2,2";
-  counter++;
-  counter2++;
-  return result;
 }
 
 
@@ -227,23 +204,45 @@ void display_matrix(int matrix[][5][10]) {
 
   for (int i = 0; i < 10; i++) {
     digitalWrite(ground[i], LOW);  // enable ground
+    
     for (int j = 0; j < 8; j++) {
       for (int k = 0; k < 5; k++) {
         if (matrix[j][k][i]) {
+          Serial.println("matrix[" + String(j) + "][" + String(k) + "][" + String(i) + "] = 1");
+          
+          // revert matrix cell back to 0 (off)
+          matrix[j][k][i] = 0;
           digitalWrite(positive2[j][k], HIGH);
         }
       }
     }
-
+    
     for (int j = 0; j < 8; j++) {
       for (int k = 0; k < 5; k++) {
-        if (matrix[j][k][i]) {
-          digitalWrite(positive2[j][k], LOW);
-        }
+        digitalWrite(positive2[j][k], LOW);
       }
     }
-
+    
     digitalWrite(ground[i], HIGH);  // disable ground
   }
 }
 
+
+/*
+ * simulate() is just a temporary function used to simulate data.
+ * Should be removed after testing is done.
+ *
+ */
+int counter = 1;
+int counter2 = 0;
+int counter3 = 4;
+String simulate() {
+  if (counter2 % 500 == 0) {
+    Serial.println("\n\nCHANGED\n\n");
+    counter++;
+    counter3++;
+  }
+  String result = String(counter3%6) + ",0,0:" + String(counter%6) + ",1,9:5,1,4";
+  counter2++;
+  return result;
+}
