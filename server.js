@@ -10,7 +10,7 @@ if (argv.length < 4) {
 }
 
 /* Initialize serial connection */
-var ser = new serialport.SerialPort(argv[2], {baudrate: parseInt(argv[3])});
+//var ser = new serialport.SerialPort(argv[2], {baudrate: parseInt(argv[3])});
 
 /* Initialize server */
 var app = connect().use(connect.static(__dirname + '/webapp')),
@@ -28,8 +28,8 @@ IO.sockets.on('connection', function (socket) {
     console.log('socket connected');
 
     socket.on('coords', function(data) {
-        ser.write(coordsToString(data.paddleA) + ":"
+        /*ser.write(coordsToString(data.paddleA) + ":"
             + coordsToString(data.paddleB) + ":"
-            + coordsToString(data.puck));
+            + coordsToString(data.puck));*/
     });
 });

@@ -22,7 +22,7 @@ Paddle.prototype.setPosition = function(x, y) {
     else if (x > this.bounds.maxX)
         this.cube.position.x = this.bounds.maxX;
     else {
-        this.velocity.x = x - this.cube.position.x * 1.5;
+        this.velocity.x = x - this.cube.position.x;
         this.cube.position.x = x;
     }
     if (y < this.bounds.minY)
@@ -30,7 +30,7 @@ Paddle.prototype.setPosition = function(x, y) {
     else if (y > this.bounds.maxY)
         this.cube.position.y = this.bounds.maxY;
     else {
-        this.velocity.y = y - this.cube.position.y * 1.5;
+        this.velocity.y = y - this.cube.position.y;
         this.cube.position.y = y;
     }
 };
@@ -144,10 +144,10 @@ Pong.prototype.update = function() {
 
 Pong.prototype.handleCollision = function(paddle) {
     if (paddle.contains(this.puck.position())) {
-            if (paddle.velocity.x > 0.001)
+            if (Math.abs(paddle.velocity.x) > 0.001)
                 this.puck.velocity.x = paddle.velocity.x;
-            if (paddle.velocity.y > 0.001)
-            this.puck.velocity.y = paddle.velocity.y;
+            if (Math.abs(paddle.velocity.y) > 0.001)
+                this.puck.velocity.y = paddle.velocity.y;
             this.puck.velocity.z = -this.puck.velocity.z;
             playBlip();
         } else {
