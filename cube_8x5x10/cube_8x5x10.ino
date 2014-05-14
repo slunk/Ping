@@ -72,7 +72,8 @@ void setup() {
   
   // set all matrix elements to 0
   memset(matrix,0, sizeof(matrix));
-
+  matrix[0][0][0] = 1;
+  matrix[7][4][9] = 1;
   // set all ground and led pins to OUTPUT
   for (int i=0; i<ground_length; i++) {
     pinMode(ground[i], OUTPUT);
@@ -95,7 +96,7 @@ void setup() {
 }
 
 void loop() {
-  delay(1000);
+  //delay(1000);
   /*
   if (Serial.available()) {
     //String input = Serial.readString();
@@ -103,7 +104,7 @@ void loop() {
     Serial.println(input);
   }
   */
-  String input = simulate();
+  /*String input = simulate();
   input.trim();
   if (input.length() > 0) {
     bool continue_parsing = 1;
@@ -145,25 +146,18 @@ void loop() {
     int puck_y = (puck.substring(first_pos+1,last_pos)).toInt();
     int puck_z = (puck.substring(last_pos+1)).toInt();
     
-    // Now take the coordinates and map them to the array
-    
-    for (int i=0; i<8; i++) {
-      for (int j=0; j<5; j++) {
-        for (int k=0; j<10; k++) {
-          // set matrix values to 1 or 0
-          }
-        }
-      }
-    }
-    
     // Turn on Paddle 1 LEDs
     int index = (7-paddle1_x) + 8*paddle1_y;
     for (int i=0; i<8; i++) {
       if ((i+(8*paddle1_y)) >= index-2 && (i+(8*paddle1_y)) <= index) {
-        digitalWrite(positive[i + (8 * paddle1_y) ], HIGH);  // enable LED
+        //digitalWrite(positive[i + (8 * paddle1_y) ], HIGH);
+        matrix[i][paddle1_y][0] = 1;
+        matrix[i][paddle1_y + 1][0] = 1;
       }
       else {
-        digitalWrite(positive[i + (8 * paddle1_y)], LOW);
+        //digitalWrite(positive[i + (8 * paddle1_y)], LOW);
+        matrix[i][paddle1_y][0] = 0;
+        matrix[i][paddle1_y + 1][0] = 0;
       }
     }
     
@@ -171,17 +165,22 @@ void loop() {
     index = (7-paddle2_x) + 8*paddle2_y;
     for (int i=0; i<8; i++) {
       if ((i+(8*paddle2_y)) >= index-2 && (i+(8*paddle2_y)) <= index) {
-        digitalWrite(positive[i + (8*paddle2_y) ], HIGH);  // enable LED
+        //digitalWrite(positive[i + (8*paddle2_y) ], HIGH);
+        matrix[i][paddle2_y][9] = 1;
+        matrix[i][paddle2_y + 1][9] = 1;
       }
       else {
-        digitalWrite(positive[i + (8*paddle2_y)], LOW);
+        //digitalWrite(positive[i + (8*paddle2_y)], LOW);
+        matrix[i][paddle2_y][9] = 0;
+        matrix[i][paddle2_y + 1][9] = 0;
       }
     }
-    
   }
   else {
     Serial.println("Error5");
-  }
+  }*/
+  //Serial.println("Asdfasd");
+  display_matrix();
   
   /*
    * Goes through and blinks all lights real fast to simulate them all being on at the same time
@@ -207,7 +206,25 @@ String simulate() {
   return result;
 }
 
-void display_matrix(int* matrix) {
-  
+void display_matrix() {
+  //Serial.println("In display mat");
+  for (int k = 0; k < 10; k++) {
+    digitalWrite(ground[k], HIGH);
+    for (int i = 0 ; i < 8; i++) {
+      for (int j = 0; j < 5; j++) {
+        if (matrix[i][j][k] == 1) {
+          //Serial.print("1 ");
+          digitalWrite(positive[i + 8 * j + 8 * 5 * k], HIGH);
+        } else {
+          //Serial.print("0 ");
+          digitalWrite(positive[i + 8 * j + 8 * 5 * k], LOW);
+        }
+      }
+      //Serial.println("\n");
+    }
+    //Serial.println("\n");
+    digitalWrite(ground[k], LOW);
+    //delay(1);
+  }
 }
 

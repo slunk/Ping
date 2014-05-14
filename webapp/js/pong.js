@@ -46,6 +46,7 @@ Paddle.prototype.contains = function(vec) {
 };
 
 Paddle.prototype.ledCubeCoords = function() {
+    var z = -this.position().z <= -10 ? -9 : this.position().z;
     return {x: Math.round(this.position().x + 3),
             y: Math.round(this.position().y + 1.5),
             z: Math.round(-this.position().z)}
@@ -53,7 +54,7 @@ Paddle.prototype.ledCubeCoords = function() {
 
 function Puck(pos, vel) {
     this.geometry = new THREE.SphereGeometry(0.5);
-    this.material = new THREE.MeshBasicMaterial({color: 0x0000ff, wireframe: true});
+    this.material = new THREE.MeshBasicMaterial({color: 0x0000ff, wireframe: false});
     this.sphere = new THREE.Mesh(this.geometry, this.material);
     this.sphere.position = pos;
     this.velocity = vel;
@@ -134,7 +135,7 @@ Pong.prototype.update = function() {
     if (this.puck.position().z > 0) {
         this.handleCollision(this.paddleA);
     }
-    if (this.puck.position().z < -10) {
+    if (this.puck.position().z < -this.depth) {
         this.handleCollision(this.paddleB);
     }
 

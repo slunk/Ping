@@ -4,13 +4,14 @@ var connect = require('connect'),
     serialport = require('serialport'),
     argv = process.argv;
 
-if (argv.length < 4) {
-    console.log("Usage: node server.js /serial/device baudrate");
+if (argv.length < 3) {
+    console.log("Usage: node server.js /serial/device (baudrate)");
     process.exit(1);
 }
 
 /* Initialize serial connection */
-//var ser = new serialport.SerialPort(argv[2], {baudrate: parseInt(argv[3])});
+var ser = new serialport.SerialPort(argv[2],
+        {baudrate: parseInt(argv[3]) || 1843200});
 
 /* Initialize server */
 var app = connect().use(connect.static(__dirname + '/webapp')),
@@ -28,8 +29,10 @@ IO.sockets.on('connection', function (socket) {
     console.log('socket connected');
 
     socket.on('coords', function(data) {
-        /*ser.write(coordsToString(data.paddleA) + ":"
+        var msg = coordsToString(data.paddleA) + ":"
             + coordsToString(data.paddleB) + ":"
-            + coordsToString(data.puck));*/
+            + coordsToString(data.puck);
+        console.log(msg);
+        ser.write(msg);
     });
 });
