@@ -74,8 +74,8 @@ int matrix[8][5][10];
 int paddle1_x = 2;
 int paddle1_y = 1;
 int paddle1_z = 0;
-int paddle2_x = 5;
-int paddle2_y = 0;
+int paddle2_x = 2;
+int paddle2_y = 1;
 int paddle2_z = 9;
 int puck_x = 3;
 int puck_y = 2;
@@ -116,14 +116,13 @@ void setup() {
 
 
 void loop() {
-  /*
+  
+  input = "";
   if (Serial.available()) {
-    //input = Serial.readString();
-    input = simulate();
-    Serial.println(input);
+    input = Serial.readString();
   }
-  */
-  input = simulate();
+  
+  //input = simulate();
   input.trim();
   if (input.length() > 0) {
     bool continue_parsing = 1;
@@ -131,10 +130,7 @@ void loop() {
     int last_pos = input.lastIndexOf(':');
     
     continue_parsing = first_pos != last_pos ? 1 : 0;
-    if (!continue_parsing) {
-      Serial.println("Error1");
-      return;
-    }
+    if (!continue_parsing) { Serial.println("Error1"); return; }
     
     String paddle1 = input.substring(0, first_pos); paddle1.trim();
     String paddle2 = input.substring(first_pos + 1, last_pos); paddle2.trim();
@@ -143,12 +139,9 @@ void loop() {
     // Parse out the coordinates for paddle 1
     first_pos = paddle1.indexOf(',');
     last_pos = paddle1.lastIndexOf(',');
-
+    
     continue_parsing = first_pos != last_pos ? 1 : 0;
-    if (!continue_parsing) {
-      Serial.println("Error2");
-      return;
-    }
+    if (!continue_parsing) { Serial.println("Error2"); return; }
 
     paddle1_x = (paddle1.substring(0, first_pos)).toInt();
     paddle1_y = (paddle1.substring(first_pos + 1, last_pos)).toInt();
@@ -157,11 +150,10 @@ void loop() {
     // Parse out the coordinates for paddle 2
     first_pos = paddle2.indexOf(',');
     last_pos = paddle2.lastIndexOf(',');
+    
     continue_parsing = first_pos != last_pos ? 1 : 0;
-    if (!continue_parsing) {
-      Serial.println("Error3");
-      return;
-    }
+    if (!continue_parsing) { Serial.println("Error3"); return; }
+    
     paddle2_x = (paddle2.substring(0, first_pos)).toInt();
     paddle2_y = (paddle2.substring(first_pos + 1, last_pos)).toInt();
     paddle2_z = (paddle2.substring(last_pos + 1)).toInt();
@@ -169,10 +161,10 @@ void loop() {
     // Parse out the coordinates for the puck
     first_pos = puck.indexOf(',');
     last_pos = puck.lastIndexOf(',');
-    if (!continue_parsing) {
-      Serial.println("Error4");
-      return;
-    }
+    
+    continue_parsing = first_pos != last_pos ? 1 : 0;
+    if (!continue_parsing) { Serial.println("Error4"); return; }
+    
     puck_x = (puck.substring(0, first_pos)).toInt();
     puck_y = (puck.substring(first_pos + 1, last_pos)).toInt();
     puck_z = (puck.substring(last_pos + 1)).toInt();
@@ -184,12 +176,12 @@ void loop() {
   // enable paddle 1 and paddle 2 LEDs
   for (int i = 0; i < 3; i++) {
     for (int j=0; j<2; j++) {
-      matrix[paddle1_x + i][paddle1_y+i][paddle1_z] = 1;
-      matrix[paddle2_x + i][paddle2_y+j][paddle2_z] = 1;
+      matrix[paddle1_x + i][paddle1_y+j ][paddle1_z] = 1;
+      matrix[paddle2_x + i][paddle2_y+j ][paddle2_z] = 1;
     }
   }
   // enable the puck LED
-  //matrix[puck_x][puck_y][puck_z] = 1;
+  matrix[puck_x][puck_y][puck_z] = 1;
 
 
   // flick all the lights on/off
@@ -235,7 +227,7 @@ void display_matrix(int matrix[][5][10]) {
  */
 int counter = 1;
 int counter2 = 0;
-int counter3 = 4;
+int counter3 = 2;
 String simulate() {
   if (counter2 % 500 == 0) {
     Serial.println("\n\nCHANGED\n\n");
