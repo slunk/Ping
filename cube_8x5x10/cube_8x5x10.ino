@@ -87,6 +87,7 @@ String input;
 void setup() {
   // initialize serial communication to 9600 bits per second:
   Serial.begin(1843200);
+  //Serial.begin(115200);
   
   input = "";
 
@@ -143,9 +144,9 @@ void loop() {
     continue_parsing = first_pos != last_pos ? 1 : 0;
     if (!continue_parsing) { Serial.println("Error2"); return; }
 
-    paddle1_x = (paddle1.substring(0, first_pos)).toInt();
-    paddle1_y = (paddle1.substring(first_pos + 1, last_pos)).toInt();
-    paddle1_z = (paddle1.substring(last_pos + 1)).toInt();
+    int p1_x = (paddle1.substring(0, first_pos)).toInt();
+    int p1_y = (paddle1.substring(first_pos + 1, last_pos)).toInt();
+    int p1_z = (paddle1.substring(last_pos + 1)).toInt();
 
     // Parse out the coordinates for paddle 2
     first_pos = paddle2.indexOf(',');
@@ -154,9 +155,9 @@ void loop() {
     continue_parsing = first_pos != last_pos ? 1 : 0;
     if (!continue_parsing) { Serial.println("Error3"); return; }
     
-    paddle2_x = (paddle2.substring(0, first_pos)).toInt();
-    paddle2_y = (paddle2.substring(first_pos + 1, last_pos)).toInt();
-    paddle2_z = (paddle2.substring(last_pos + 1)).toInt();
+    int p2_x = (paddle2.substring(0, first_pos)).toInt();
+    int p2_y = (paddle2.substring(first_pos + 1, last_pos)).toInt();
+    int p2_z = (paddle2.substring(last_pos + 1)).toInt();
 
     // Parse out the coordinates for the puck
     first_pos = puck.indexOf(',');
@@ -165,12 +166,26 @@ void loop() {
     continue_parsing = first_pos != last_pos ? 1 : 0;
     if (!continue_parsing) { Serial.println("Error4"); return; }
     
-    puck_x = (puck.substring(0, first_pos)).toInt();
-    puck_y = (puck.substring(first_pos + 1, last_pos)).toInt();
-    puck_z = (puck.substring(last_pos + 1)).toInt();
-  }
-  else {
-    Serial.println("else");
+    int pu_x = (puck.substring(0, first_pos)).toInt();
+    int pu_y = (puck.substring(first_pos + 1, last_pos)).toInt();
+    int pu_z = (puck.substring(last_pos + 1)).toInt();
+    
+    // Bounds Checking
+    if ((p1_x >= 0 && p1_x <= 5) && (p2_x >= 0 && p2_x <= 5) && (pu_x >= 0 && pu_x <= 7) &&
+        (p1_y >= 0 && p1_y <= 4) && (p2_y >= 0 && p2_y <= 4) && (pu_y >= 0 && pu_y <= 5) &&
+        (p1_z >= 0 && p1_z <= 9) && (p2_z >= 0 && p2_z <= 9) && (pu_z >= 0 && pu_z <= 9)) {
+          
+          
+          paddle1_x = p1_x;
+          paddle1_y = p1_y;
+          paddle1_z = p1_z;
+          paddle2_x = p2_x;
+          paddle2_y = p2_y;
+          paddle2_z = p2_z;
+          puck_x = pu_x;
+          puck_y = pu_y;
+          puck_z = pu_z;          
+        }
   }
   
   // enable paddle 1 and paddle 2 LEDs
@@ -200,7 +215,7 @@ void display_matrix(int matrix[][5][10]) {
     for (int j = 0; j < 8; j++) {
       for (int k = 0; k < 5; k++) {
         if (matrix[j][k][i]) {
-          Serial.println("matrix[" + String(j) + "][" + String(k) + "][" + String(i) + "] = 1");
+          //Serial.println("matrix[" + String(j) + "][" + String(k) + "][" + String(i) + "] = 1");
           
           // revert matrix cell back to 0 (off)
           matrix[j][k][i] = 0;
@@ -230,7 +245,7 @@ int counter2 = 0;
 int counter3 = 2;
 String simulate() {
   if (counter2 % 500 == 0) {
-    Serial.println("\n\nCHANGED\n\n");
+    //Serial.println("\n\nCHANGED\n\n");
     counter++;
     counter3++;
   }
