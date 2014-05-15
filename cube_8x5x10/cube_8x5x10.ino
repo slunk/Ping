@@ -55,176 +55,229 @@ const int p38 = 12;
 const int p39 = 13;
 
 
-const int ground[] = {g0,g1,g2,g3,g4,g5,g6,g7,g8,g9};
-const int positive[] = {p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,
-                        p16,p17,p18,p19,p20,p21,p22,p23,p24,p25,p26,p27,p28,p29,
-                        p30,p31,p32,p33,p34,p35,p36,p37,p38,p39};
+const int ground[] = {g0, g1, g2, g3, g4, g5, g6, g7, g8, g9};
 
+int positive2[][5] = {{p7, p15, p23, p31, p39},
+                      {p6, p14, p22, p30, p38},
+                      {p5, p13, p21, p29, p37},
+                      {p4, p12, p20, p28, p36},
+                      {p3, p11, p19, p27, p35},
+                      {p2, p10, p18, p26, p34},
+                      {p1, p9, p17, p25, p33},
+                      {p0, p8, p16, p24, p32}};
 
-const int ground_length = sizeof(ground)/sizeof(ground[0]);
-const int positive_length = sizeof(positive)/sizeof(positive[0]);
-
+const int ground_length = sizeof(ground) / sizeof(ground[0]);
 int matrix[8][5][10];
 
+// Initial settings for paddle 1, paddle 2, and the puck
+int paddle1_x = 2;
+int paddle1_y = 1;
+int paddle1_z = 0;
+int paddle2_x = 2;
+int paddle2_y = 1;
+int paddle2_z = 9;
+int puck_x = 3;
+int puck_y = 2;
+int puck_z = 4;
+
+
+String input;
+
 void setup() {
-  // initialize serial communication to 9600 bits per second:
-  Serial.begin(9600);
   
+  // initialize serial communication to 9600 bits per second:
+  //Serial.begin(1843200);
+  Serial.begin(115200);
+  
+  input = "";
+
   // set all matrix elements to 0
-  memset(matrix,0, sizeof(matrix));
-  matrix[0][0][0] = 1;
-  matrix[7][4][9] = 1;
+  memset(matrix, 0, sizeof(matrix));
+
   // set all ground and led pins to OUTPUT
-  for (int i=0; i<ground_length; i++) {
+  for (int i = 0; i < ground_length; i++) {
     pinMode(ground[i], OUTPUT);
   }
-  for (int i=0; i<positive_length; i++) {
-    pinMode(positive[i], OUTPUT);
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 5; j++) {
+      pinMode(positive2[i][j], OUTPUT);
+    }
   }
-  
   
   // turn everything off initially
-  for (int i=0; i<ground_length; i++) {
+  for (int i = 0; i < ground_length; i++) {
     digitalWrite(ground[i], HIGH);  // will act as ground when LOW;
   }
-  for (int i=0; i<positive_length; i++) {
-    digitalWrite(positive[i], LOW);
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 5; j++) {
+      digitalWrite(positive2[i][j], LOW);
+    }
   }
-  
-  //digitalWrite(ground[0], LOW);  // enable ground for the layer with paddle 1
-  //digitalWrite(ground[ground_length-1], LOW);  // enable ground for the layer with paddle 2
+  /*pinMode(2,OUTPUT);    // port B pin 25  
+  analogWrite(2,255);   // sets up some other registers I haven't worked out yet
+  REG_PIOB_PDR = 1<<25; // disable PIO, enable peripheral
+  REG_PIOB_ABSR= 1<<25; // select peripheral B
+  REG_TC0_WPMR=0x54494D00; // enable write to registers
+  REG_TC0_CMR0=0b00000000000010011100010000000000; // set channel mode register (see datasheet)
+  REG_TC0_RC0=100; // counter period
+  REG_TC0_RA0=30000000;  // PWM value
+  REG_TC0_CCR0=0b101;    // start counter
+  REG_TC0_IER0=0b00010000; // enable interrupt on counter=rc
+  REG_TC0_IDR0=0b11101111; // disable other interrupts
+
+  NVIC_EnableIRQ(TC0_IRQn); // enable TC0 interrupts*/
 }
 
+/*void TC0_Handler()
+{
+    long dummy=REG_TC0_SR0; // vital - reading this clears some flag
+                            // otherwise you get infinite interrupts
+    //display_matrix(matrix);
+    //Serial.println("blah");
+}*/
+char serInput[20];
+
 void loop() {
-  //delay(1000);
-  /*
-  if (Serial.available()) {
-    //String input = Serial.readString();
-    String input = simulate();
-    Serial.println(input);
+  input = "";
+  char inChar;
+  int idx = 0;
+  memset(serInput, 0, sizeof(serInput));
+  while (Serial.available()) {
+    inChar = Serial.read();
+    //if (inChar != ' ')
+    serInput[idx++] = inChar;
+    display_matrix(matrix);
+    //input = Serial.readString();
   }
-  */
-  /*String input = simulate();
+  input = String(serInput);
+ 
+  //input = simulate();
   input.trim();
   if (input.length() > 0) {
     bool continue_parsing = 1;
     int first_pos = input.indexOf(':');
     int last_pos = input.lastIndexOf(':');
     
-    continue_parsing = first_pos != last_pos ? 1:0;
+    continue_parsing = first_pos != last_pos ? 1 : 0;
     if (!continue_parsing) { Serial.println("Error1"); return; }
     
-    String paddle1 = input.substring(0,first_pos); paddle1.trim();
-    String paddle2 = input.substring(first_pos+1,last_pos); paddle2.trim();
-    String puck = input.substring(last_pos+1); puck.trim();
-    
+    String paddle1 = input.substring(0, first_pos); paddle1.trim();
+    String paddle2 = input.substring(first_pos + 1, last_pos); paddle2.trim();
+    String puck = input.substring(last_pos + 1); puck.trim();
+
     // Parse out the coordinates for paddle 1
     first_pos = paddle1.indexOf(',');
     last_pos = paddle1.lastIndexOf(',');
     
-    continue_parsing = first_pos != last_pos ? 1:0;
+    continue_parsing = first_pos != last_pos ? 1 : 0;
     if (!continue_parsing) { Serial.println("Error2"); return; }
-    
-    int paddle1_x = (paddle1.substring(0,first_pos)).toInt();
-    int paddle1_y = (paddle1.substring(first_pos+1,last_pos)).toInt();
-    int paddle1_z = (paddle1.substring(last_pos+1)).toInt();
-    
+
+    int p1_x = (paddle1.substring(0, first_pos)).toInt();
+    int p1_y = (paddle1.substring(first_pos + 1, last_pos)).toInt();
+    int p1_z = (paddle1.substring(last_pos + 1)).toInt();
+
     // Parse out the coordinates for paddle 2
     first_pos = paddle2.indexOf(',');
     last_pos = paddle2.lastIndexOf(',');
-    continue_parsing = first_pos != last_pos ? 1:0;
-    if (!continue_parsing) { Serial.println("Error3"); return; }
-    int paddle2_x = (paddle2.substring(0,first_pos)).toInt();
-    int paddle2_y = (paddle2.substring(first_pos+1,last_pos)).toInt();
-    int paddle2_z = (paddle2.substring(last_pos+1)).toInt();
     
+    continue_parsing = first_pos != last_pos ? 1 : 0;
+    if (!continue_parsing) { Serial.println("Error3"); return; }
+    
+    int p2_x = (paddle2.substring(0, first_pos)).toInt();
+    int p2_y = (paddle2.substring(first_pos + 1, last_pos)).toInt();
+    int p2_z = (paddle2.substring(last_pos + 1)).toInt();
+
     // Parse out the coordinates for the puck
     first_pos = puck.indexOf(',');
     last_pos = puck.lastIndexOf(',');
+    
+    continue_parsing = first_pos != last_pos ? 1 : 0;
     if (!continue_parsing) { Serial.println("Error4"); return; }
-    int puck_x = (puck.substring(0,first_pos)).toInt();
-    int puck_y = (puck.substring(first_pos+1,last_pos)).toInt();
-    int puck_z = (puck.substring(last_pos+1)).toInt();
     
-    // Turn on Paddle 1 LEDs
-    int index = (7-paddle1_x) + 8*paddle1_y;
-    for (int i=0; i<8; i++) {
-      if ((i+(8*paddle1_y)) >= index-2 && (i+(8*paddle1_y)) <= index) {
-        //digitalWrite(positive[i + (8 * paddle1_y) ], HIGH);
-        matrix[i][paddle1_y][0] = 1;
-        matrix[i][paddle1_y + 1][0] = 1;
-      }
-      else {
-        //digitalWrite(positive[i + (8 * paddle1_y)], LOW);
-        matrix[i][paddle1_y][0] = 0;
-        matrix[i][paddle1_y + 1][0] = 0;
-      }
-    }
+    int pu_x = (puck.substring(0, first_pos)).toInt();
+    int pu_y = (puck.substring(first_pos + 1, last_pos)).toInt();
+    int pu_z = (puck.substring(last_pos + 1)).toInt();
     
-    // Turn on Paddle 2 LEDs
-    index = (7-paddle2_x) + 8*paddle2_y;
-    for (int i=0; i<8; i++) {
-      if ((i+(8*paddle2_y)) >= index-2 && (i+(8*paddle2_y)) <= index) {
-        //digitalWrite(positive[i + (8*paddle2_y) ], HIGH);
-        matrix[i][paddle2_y][9] = 1;
-        matrix[i][paddle2_y + 1][9] = 1;
-      }
-      else {
-        //digitalWrite(positive[i + (8*paddle2_y)], LOW);
-        matrix[i][paddle2_y][9] = 0;
-        matrix[i][paddle2_y + 1][9] = 0;
-      }
-    }
+    // Bounds Checking
+    if ((p1_x >= 0 && p1_x <= 5) && (p2_x >= 0 && p2_x <= 5) && (pu_x >= 0 && pu_x <= 7) &&
+        (p1_y >= 0 && p1_y <= 4) && (p2_y >= 0 && p2_y <= 4) && (pu_y >= 0 && pu_y <= 5) &&
+        (p1_z >= 0 && p1_z <= 9) && (p2_z >= 0 && p2_z <= 9) && (pu_z >= 0 && pu_z <= 9)) {
+          
+          
+          paddle1_x = p1_x;
+          paddle1_y = p1_y;
+          paddle1_z = p1_z;
+          paddle2_x = p2_x;
+          paddle2_y = p2_y;
+          paddle2_z = p2_z;
+          puck_x = pu_x;
+          puck_y = pu_y;
+          puck_z = pu_z;          
+        }
   }
-  else {
-    Serial.println("Error5");
-  }*/
-  //Serial.println("Asdfasd");
-  display_matrix();
   
-  /*
-   * Goes through and blinks all lights real fast to simulate them all being on at the same time
-   */
-  /*
-  for (int i=0; i<ground_length; i++) {
-    digitalWrite(ground[i], LOW);
+  // enable paddle 1 and paddle 2 LEDs
+  for (int i = 0; i < 3; i++) {
+    for (int j=0; j<2; j++) {
+      matrix[paddle1_x + i][paddle1_y+j ][paddle1_z] = 1;
+      matrix[paddle2_x + i][paddle2_y+j ][paddle2_z] = 1;
+    }
   }
-  delay(15);
-  for (int i=0; i<ground_length; i++) {
-    digitalWrite(ground[i], HIGH);
-  }
-  */
+  // enable the puck LED
+  matrix[puck_x][puck_y][puck_z] = 1;
+
+
+  // flick all the lights on/off
+  display_matrix(matrix);
 }
 
-int counter = 0;
-int counter2 = 0;
 
+/*
+ *  Turn on lights corresponding to the matrix parameter
+ */
+void display_matrix(int matrix[][5][10]) {
+
+  for (int i = 0; i < 10; i++) {
+    digitalWrite(ground[i], LOW);  // enable ground
+    
+    for (int j = 0; j < 8; j++) {
+      for (int k = 0; k < 5; k++) {
+        if (matrix[j][k][i]) {
+          //Serial.println("matrix[" + String(j) + "][" + String(k) + "][" + String(i) + "] = 1");
+          
+          // revert matrix cell back to 0 (off)
+          matrix[j][k][i] = 0;
+          digitalWrite(positive2[j][k], HIGH);
+        }
+      }
+    }
+    
+    for (int j = 0; j < 8; j++) {
+      for (int k = 0; k < 5; k++) {
+        digitalWrite(positive2[j][k], LOW);
+      }
+    }
+    
+    digitalWrite(ground[i], HIGH);  // disable ground
+  }
+}
+
+
+/*
+ * simulate() is just a temporary function used to simulate data.
+ * Should be removed after testing is done.
+ *
+ */
+int counter = 1;
+int counter2 = 0;
+int counter3 = 2;
 String simulate() {
-  String result = String(counter%6) + ",1,0:" + String(counter%6) + ",3,1:2,2,2";
-  counter++;
+  if (counter2 % 500 == 0) {
+    //Serial.println("\n\nCHANGED\n\n");
+    counter++;
+    counter3++;
+  }
+  String result = String(counter3%6) + ",0,0:" + String(counter%6) + ",1,9:5,1,4";
   counter2++;
   return result;
 }
-
-void display_matrix() {
-  //Serial.println("In display mat");
-  for (int k = 0; k < 10; k++) {
-    digitalWrite(ground[k], HIGH);
-    for (int i = 0 ; i < 8; i++) {
-      for (int j = 0; j < 5; j++) {
-        if (matrix[i][j][k] == 1) {
-          //Serial.print("1 ");
-          digitalWrite(positive[i + 8 * j + 8 * 5 * k], HIGH);
-        } else {
-          //Serial.print("0 ");
-          digitalWrite(positive[i + 8 * j + 8 * 5 * k], LOW);
-        }
-      }
-      //Serial.println("\n");
-    }
-    //Serial.println("\n");
-    digitalWrite(ground[k], LOW);
-    //delay(1);
-  }
-}
-

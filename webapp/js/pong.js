@@ -4,10 +4,10 @@ function Paddle(pos, bounds) {
     this.cube = new THREE.Mesh(this.geometry, this.material);
     this.cube.position = pos;
     this.bounds = bounds || {
-        minX: -3,
-        maxX: 3,
-        minY: -2,
-        maxY: 2
+        minX: -2.5,
+        maxX: 2.5,
+        minY: -1.5,
+        maxY: 1.5
     };
     this.velocity = new THREE.Vector3(0, 0, 0);
 }
@@ -48,7 +48,7 @@ Paddle.prototype.contains = function(vec) {
 Paddle.prototype.ledCubeCoords = function() {
     var z = -this.position().z <= -10 ? -9 : this.position().z;
     return {x: Math.round(this.position().x + 3),
-            y: Math.round(this.position().y + 1.5),
+            y: 3 - Math.round(this.position().y + 1.5),
             z: Math.round(-this.position().z)}
 };
 
@@ -80,7 +80,7 @@ Puck.prototype.mesh = function() {
 
 Puck.prototype.ledCubeCoords = function() {
     return {x: Math.round(this.position().x + 4),
-            y: Math.round(this.position().y + 2.5),
+            y: 3 - Math.round(this.position().y + 1.5),
             z: Math.round(-this.position().z)}
 };
 
