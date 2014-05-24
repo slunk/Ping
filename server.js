@@ -10,8 +10,8 @@ if (argv.length < 3) {
 }
 
 /* Initialize serial connection */
-var ser = new serialport.SerialPort(argv[2],
-        {baudrate: 115200});
+//var ser = new serialport.SerialPort(argv[2],
+//        {baudrate: 115200});
         //{baudrate: 1843200});
 
 /* Initialize server */
@@ -63,13 +63,13 @@ IO.sockets.on('connection', function (socket) {
     console.log('socket connected');
 
     socket.on('coords', function(data) {
-        if (counter % 10 == 0 && stateChanged(data)) {
+        if (counter % 12 == 0 && stateChanged(data)) {
             var msg = coordsToString(data.paddleA) + ":"
                 + coordsToString(data.paddleB) + ":"
                 + coordsToString(data.puck);
-            //console.log(msg);
+            console.log(msg);
             last = data;
-            ser.write(msg);
+            //ser.write(msg);
         }
         counter++;
     });

@@ -54,6 +54,8 @@ const int p37 = 11;
 const int p38 = 12;
 const int p39 = 13;
 
+const int status_led = 2;
+
 
 const int ground[] = {g0, g1, g2, g3, g4, g5, g6, g7, g8, g9};
 
@@ -104,6 +106,9 @@ void setup() {
     }
   }
   
+  pinMode(status_led, OUTPUT);
+  digitalWrite(status_led, LOW);
+  
   // turn everything off initially
   for (int i = 0; i < ground_length; i++) {
     digitalWrite(ground[i], HIGH);  // will act as ground when LOW;
@@ -136,6 +141,8 @@ void setup() {
     //Serial.println("blah");
 }*/
 char serInput[20];
+int countdown = 0;
+int last_puck_z = 5;
 
 void loop() {
   input = "";
@@ -215,6 +222,19 @@ void loop() {
           puck_z = pu_z;          
         }
   }
+  
+  if ((last_puck_z <= 1 || last_puck_z >= 8) && (puck_z == 4 || puck_z == 5)) {
+    countdown = 500;
+  }
+  
+  if (countdown > 0) {
+    digitalWrite(status_led, HIGH);
+    countdown--;
+  } else {
+    digitalWrite(status_led, LOW);
+  }
+  
+  last_puck_z = puck_z;
   
   // enable paddle 1 and paddle 2 LEDs
   for (int i = 0; i < 3; i++) {

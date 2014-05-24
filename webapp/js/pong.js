@@ -47,14 +47,14 @@ Paddle.prototype.contains = function(vec) {
 
 Paddle.prototype.ledCubeCoords = function() {
     var z = -this.position().z <= -10 ? -9 : this.position().z;
-    return {x: Math.round(this.position().x + 3),
+    return {x: Math.round(this.position().x + 2.5),
             y: 3 - Math.round(this.position().y + 1.5),
             z: Math.round(-this.position().z)}
 };
 
 function Puck(pos, vel) {
-    this.geometry = new THREE.SphereGeometry(0.5);
-    this.material = new THREE.MeshBasicMaterial({color: 0x0000ff, wireframe: false});
+    this.geometry = new THREE.SphereGeometry(0.3);
+    this.material = new THREE.MeshBasicMaterial({color: 0x0000ff, wireframe: true});
     this.sphere = new THREE.Mesh(this.geometry, this.material);
     this.sphere.position = pos;
     this.velocity = vel;
@@ -79,7 +79,7 @@ Puck.prototype.mesh = function() {
 };
 
 Puck.prototype.ledCubeCoords = function() {
-    return {x: Math.round(this.position().x + 4),
+    return {x: Math.round(this.position().x + 3.5),
             y: 3 - Math.round(this.position().y + 1.5),
             z: Math.round(-this.position().z)}
 };
@@ -93,7 +93,7 @@ function Pong(width, height, depth) {
     this.paddleB = new Paddle(new THREE.Vector3(0, 0, -depth));
 
     this.puck = new Puck(new THREE.Vector3(0, 0, -depth / 2),
-        new THREE.Vector3(0, 0, 0.1));
+        new THREE.Vector3(0, 0, 0.08));
 
     this.boundsGeometry = new THREE.BoxGeometry(width, height, depth);
     this.boundsMaterial = new THREE.MeshBasicMaterial({color: 0x0000ff, wireframe: true});
